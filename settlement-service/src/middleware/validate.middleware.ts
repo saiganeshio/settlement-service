@@ -1,0 +1,23 @@
+import { plainToInstance } from 'class-transformer';
+
+import { validate } from 'class-validator';
+
+import { Request, Response, NextFunction } from 'express';
+
+export const validateDto = (DtoClass: new () => object) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const dtoObject = plainToInstance(DtoClass, req.body);
+
+    const errors = await validate(dtoObject);
+
+    if (errors.length > 0) {
+      return res.status(400).json({
+        errors,
+      });
+    }
+
+    req.body = dtoObject;
+
+    next();
+  };
+};
